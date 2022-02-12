@@ -43,17 +43,6 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 func (s *Server) initRoutes() {
-	/*	router := gin.New()
-
-		api := router.Group("/api")
-		{
-			api.GET("/", s.getLink)
-			api.POST("/", s.postLink)
-
-		}
-
-		return router*/
-
 	link := s.r.PathPrefix("/api").
 		Subrouter()
 	link.HandleFunc("", s.postLink).

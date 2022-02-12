@@ -21,3 +21,9 @@ func NewRepository(db *dbr.Connection) *Repository {
 		Link: NewLinkPostgres(db),
 	}
 }
+
+func NewMemoryRepository() *Repository {
+	return &Repository{
+		Link: NewLinkMemory(),
+	}
+}

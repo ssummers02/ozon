@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -21,20 +22,12 @@ func main() {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		DBSchema: viper.GetString("db.schema"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-		Password: viper.GetString("db.password"),
-	})
+	repos, err := selectDB()
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
+		return
 	}
 
-	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	srv := handler.NewServer(viper.GetString("port"), services)
 
@@ -56,9 +49,36 @@ func main() {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
 
-	if err := db.Close(); err != nil {
-		logrus.Errorf("error occured on db connection close: %s", err.Error())
+}
+
+const PostreSQLDB = "postgres"
+const MemoryDB = "memory"
+
+func selectDB() (*repository.Repository, error) {
+	if viper.GetString("paramdb") == PostreSQLDB {
+		db, err := repository.NewPostgresDB(repository.Config{
+			Host:     viper.GetString("db.host"),
+			Port:     viper.GetString("db.port"),
+			Username: viper.GetString("db.username"),
+			DBSchema: viper.GetString("db.schema"),
+			DBName:   viper.GetString("db.dbname"),
+			SSLMode:  viper.GetString("db.sslmode"),
+			Password: viper.GetString("db.password"),
+		})
+		if err != nil {
+			logrus.Fatalf("failed to initialize db: %s", err.Error())
+			return nil, err
+		}
+		if err := db.Close(); err != nil {
+			logrus.Errorf("error occured on db connection close: %s", err.Error())
+		}
+		return repository.NewRepository(db), nil
 	}
+	if viper.GetString("paramdb") == MemoryDB {
+		return repository.NewMemoryRepository(), nil
+
+	}
+	return nil, errors.New("failed to params db")
 }
 
 func initConfig() error {

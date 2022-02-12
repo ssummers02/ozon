@@ -26,25 +26,12 @@ func (s *Server) postLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SendOK(w, http.StatusOK, result)
-	/*if err := c.BindJSON(&link); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
+	response := LinkResponse{
+		Link:      result.Link,
+		ShortLink: result.ShortLink,
 	}
 
-	if len(link.Link) == 0 {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
-	}
-
-	result, err := s.services.Link.Create(link)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, result)*/
-
+	SendOK(w, http.StatusOK, response)
 }
 func (s *Server) getLink(w http.ResponseWriter, r *http.Request) {
 	var data restmodel.Link
@@ -66,22 +53,10 @@ func (s *Server) getLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SendOK(w, http.StatusOK, result)
-	/*if err := c.BindJSON(&link); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
+	response := LinkResponse{
+		Link:      result.Link,
+		ShortLink: result.ShortLink,
 	}
 
-	if len(link.ShortLink) == 0 {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
-	}
-
-	result, err := s.services.Link.GetByShortLink(link)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, result)*/
+	SendOK(w, http.StatusOK, response)
 }
