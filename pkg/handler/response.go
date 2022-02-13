@@ -25,12 +25,7 @@ type LinkResponse struct {
 func SendErr(w http.ResponseWriter, code int, text string) {
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(
-		DefaultResponse{
-			IsOK: false,
-			Data: DefaultError{
-				Text: text,
-			},
-		},
+		DefaultError{Text: text},
 	)
 }
 
@@ -41,9 +36,6 @@ func SendOK(w http.ResponseWriter, code int, p interface{}) {
 
 	// These two do not allow body
 	_ = json.NewEncoder(w).Encode(
-		DefaultResponse{
-			IsOK: true,
-			Data: p,
-		},
+		p,
 	)
 }
